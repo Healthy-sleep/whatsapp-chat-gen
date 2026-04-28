@@ -608,6 +608,30 @@
 
   .message-status svg { width: 14px; height: 14px; }
 
+  /* 图片消息时间戳叠加 */
+  .img-container {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+  }
+  .img-time-overlay {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    line-height: 1;
+  }
+  .img-time-overlay .msg-time {
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .img-time-overlay svg { width: 13px; height: 13px; }
+
   /* 底部输入栏 */
   .input-bar {
     background: #f6f6f6;
@@ -945,7 +969,7 @@ const i18n = {
 
 // ====== 初始化 ======
 document.addEventListener('DOMContentLoaded', () => {
-  setLanguage('ar'); // 默认阿拉伯语
+  setLanguage('zh'); // 默认中文（LTR布局）
   loadDemo(); // 加载示例数据
 
   document.getElementById('chatName').addEventListener('input', updateHeader);
@@ -1125,40 +1149,75 @@ function renderMessages() {
       div.classList.add('msg-middle');
     }
 
-    if (msg.image) {
+    // Pure image message: time overlay on image
+    if (msg.image && !msg.text) {
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'img-container';
+
       const img = document.createElement('img');
       img.className = 'message-img';
       img.src = msg.image;
       img.style.maxWidth = '240px';
-      div.appendChild(img);
-    }
+      img.style.marginBottom = '0';
+      imgContainer.appendChild(img);
 
-    if (msg.text) {
-      const textSpan = document.createElement('span');
-      textSpan.textContent = msg.text;
-      div.appendChild(textSpan);
-    }
+      const overlay = document.createElement('div');
+      overlay.className = 'img-time-overlay';
 
-    const footer = document.createElement('div');
-    footer.className = 'message-footer';
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'msg-time';
+      timeSpan.textContent = msg.time;
+      overlay.appendChild(timeSpan);
 
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'message-time';
-    timeSpan.textContent = msg.time;
-    footer.appendChild(timeSpan);
-
-    if (msg.sender === 'sent') {
-      const statusDiv = document.createElement('div');
-      statusDiv.className = 'message-status';
-      if (showRead) {
-        statusDiv.innerHTML = '<svg viewBox="0 0 16 16" fill="#53bdeb"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97zm2.94 0a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02l-4.62-4.62a.75.75 0 1 1 1.06-1.06l4.08 4.08L11.91 4.97z"/></svg>';
-      } else {
-        statusDiv.innerHTML = '<svg viewBox="0 0 16 16" fill="#667781"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97z"/></svg>';
+      if (msg.sender === 'sent') {
+        const statusSvg = document.createElement('span');
+        if (showRead) {
+          statusSvg.innerHTML = '<svg viewBox="0 0 16 16" fill="#fff"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97zm2.94 0a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02l-4.62-4.62a.75.75 0 1 1 1.06-1.06l4.08 4.08L11.91 4.97z"/></svg>';
+        } else {
+          statusSvg.innerHTML = '<svg viewBox="0 0 16 16" fill="#fff"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97z"/></svg>';
+        }
+        overlay.appendChild(statusSvg);
       }
-      footer.appendChild(statusDiv);
-    }
 
-    div.appendChild(footer);
+      imgContainer.appendChild(overlay);
+      div.appendChild(imgContainer);
+    } else {
+      // Normal message (with text, possibly with image)
+      if (msg.image) {
+        const img = document.createElement('img');
+        img.className = 'message-img';
+        img.src = msg.image;
+        img.style.maxWidth = '240px';
+        div.appendChild(img);
+      }
+
+      if (msg.text) {
+        const textSpan = document.createElement('span');
+        textSpan.textContent = msg.text;
+        div.appendChild(textSpan);
+      }
+
+      const footer = document.createElement('div');
+      footer.className = 'message-footer';
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'message-time';
+      timeSpan.textContent = msg.time;
+      footer.appendChild(timeSpan);
+
+      if (msg.sender === 'sent') {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'message-status';
+        if (showRead) {
+          statusDiv.innerHTML = '<svg viewBox="0 0 16 16" fill="#53bdeb"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97zm2.94 0a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02l-4.62-4.62a.75.75 0 1 1 1.06-1.06l4.08 4.08L11.91 4.97z"/></svg>';
+        } else {
+          statusDiv.innerHTML = '<svg viewBox="0 0 16 16" fill="#667781"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97z"/></svg>';
+        }
+        footer.appendChild(statusDiv);
+      }
+
+      div.appendChild(footer);
+    }
     chatArea.appendChild(div);
   });
 
