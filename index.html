@@ -326,32 +326,6 @@
     overflow: hidden;
   }
 
-  /* 灵动岛 */
-  .dynamic-island {
-    position: absolute;
-    top: 11px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 126px;
-    height: 37px;
-    background: #000;
-    border-radius: 20px;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .dynamic-island::before,
-  .dynamic-island::after {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #1a1a1a;
-  }
-
   /* 屏幕 */
   .iphone-screen {
     width: 100%;
@@ -383,8 +357,7 @@
   }
 
   .iphone-screen.arabic .status-bar {
-    flex-direction: row-reverse;
-    padding: 0 30px 8px 24px;
+    padding: 0 24px 8px;
   }
 
   .status-time {
@@ -399,6 +372,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
+    color: #000;
   }
 
   .iphone-screen.arabic .status-icons {
@@ -406,6 +380,13 @@
   }
 
   .status-icons svg { height: 14px; width: auto; }
+
+  .battery-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    margin-left: 2px;
+  }
 
   /* 聊天头部 */
   .chat-header {
@@ -431,7 +412,7 @@
   }
 
   .iphone-screen.arabic .back-btn {
-    transform: scaleX(-1);
+    /* Arabic back button (〉) is already pointing right, no flip needed */
   }
 
   .header-avatar {
@@ -808,16 +789,14 @@
     <div class="iphone-frame">
       <!-- 屏幕 -->
       <div class="iphone-screen" id="captureTarget">
-        <!-- 灵动岛 -->
-        <div class="dynamic-island"></div>
-
         <!-- 状态栏 -->
         <div class="status-bar">
           <div class="status-time" id="statusTime">14:30</div>
           <div class="status-icons">
-            <svg viewBox="0 0 18 12" width="18" height="12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="5" y="5" width="3" height="7" rx="0.5"/><rect x="10" y="2" width="3" height="10" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5"/></svg>
-            <svg viewBox="0 0 16 12" width="16" height="12" fill="currentColor"><path d="M8 0C4.5 0 1.4 1.6 0 4.2l.8.6C2 2.5 4.8 1.2 8 1.2s6 1.3 7.2 3.6l.8-.6C14.6 1.6 11.5 0 8 0z"/><path d="M8 3.5c-2.3 0-4.4 1-5.7 2.7l.8.6C4.2 5.5 6 4.6 8 4.6s3.8.9 4.9 2.2l.8-.6C12.4 4.5 10.3 3.5 8 3.5z"/><circle cx="8" cy="10" r="1.5"/></svg>
-            <svg viewBox="0 0 30 14" width="30" height="14"><rect x="0.5" y="0.5" width="25" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2.5" y="2.5" width="20" height="9" rx="1.5" fill="currentColor"/><path d="M27.5 4.5v5a1.5 1.5 0 0 0 .75-1.3V5.8A1.5 1.5 0 0 0 27.5 4.5z" fill="currentColor"/><text x="12.5" y="9.5" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="7" font-weight="700" font-family="-apple-system, sans-serif">100</text></svg>
+            <svg class="signal-icon" viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx="0.5" fill="#000"/><rect x="5" y="5" width="3" height="7" rx="0.5" fill="#000"/><rect x="10" y="2" width="3" height="10" rx="0.5" fill="#000"/><rect x="15" y="0" width="3" height="12" rx="0.5" fill="#000"/></svg>
+            <svg class="wifi-icon" viewBox="0 0 16 12" width="16" height="12"><path d="M8 0C4.5 0 1.4 1.6 0 4.2l.8.6C2 2.5 4.8 1.2 8 1.2s6 1.3 7.2 3.6l.8-.6C14.6 1.6 11.5 0 8 0z" fill="#000"/><path d="M8 3.5c-2.3 0-4.4 1-5.7 2.7l.8.6C4.2 5.5 6 4.6 8 4.6s3.8.9 4.9 2.2l.8-.6C12.4 4.5 10.3 3.5 8 3.5z" fill="#000"/><circle cx="8" cy="10" r="1.5" fill="#000"/></svg>
+            <svg class="battery-icon" viewBox="0 0 27 12" width="27" height="12"><rect x="0.5" y="0.5" width="23" height="11" rx="2.5" fill="none" stroke="#000" stroke-width="1"/><rect x="2" y="2" width="19" height="8" rx="1.5" fill="#000"/><path d="M25 4v4a1 1 0 0 0 .5-.87V4.87A1 1 0 0 0 25 4z" fill="#000"/></svg>
+            <span class="battery-pct">100%</span>
           </div>
         </div>
 
@@ -928,10 +907,12 @@ function setLanguage(lang) {
   const screen = document.querySelector('.iphone-screen');
   if (lang === 'ar') {
     screen.classList.add('arabic');
+    screen.setAttribute('dir', 'rtl');
     document.getElementById('backBtn').textContent = i18n.ar.backBtn;
     document.getElementById('inputPlaceholder').placeholder = i18n.ar.inputPlaceholder;
   } else {
     screen.classList.remove('arabic');
+    screen.setAttribute('dir', 'ltr');
     document.getElementById('backBtn').textContent = i18n.zh.backBtn;
     document.getElementById('inputPlaceholder').placeholder = i18n.zh.inputPlaceholder;
   }
