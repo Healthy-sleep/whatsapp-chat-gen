@@ -558,60 +558,20 @@
     border-radius: 12px 12px 2px 12px;
   }
 
-  /* 连续消息堆叠 - 中间消息顶部更平 */
+  /* 连续消息堆叠 - 中间消息顶部更平，左侧也更平 */
   .message.sent + .message.sent {
-    border-radius: 4px 12px 2px 12px;
-    margin-top: -1px;
+    border-radius: 4px 12px 2px 4px;
+    margin-top: 1px;
   }
   .message.received + .message.received {
-    border-radius: 12px 4px 12px 2px;
-    margin-top: -1px;
+    border-radius: 12px 4px 4px 2px;
+    margin-top: 1px;
   }
   .iphone-screen.arabic .message.sent + .message.sent {
-    border-radius: 12px 4px 12px 2px;
+    border-radius: 12px 4px 4px 2px;
   }
   .iphone-screen.arabic .message.received + .message.received {
-    border-radius: 4px 12px 2px 12px;
-  }
-
-  /* 消息尾巴 */
-  .msg-tail {
-    position: absolute;
-    bottom: -1px;
-    width: 12px;
-    height: 16px;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .msg-tail.sent {
-    right: -6px;
-  }
-  .msg-tail.received {
-    left: -6px;
-  }
-  .iphone-screen.arabic .msg-tail.sent {
-    right: auto;
-    left: -6px;
-  }
-  .iphone-screen.arabic .msg-tail.received {
-    left: auto;
-    right: -6px;
-  }
-  .tail-shape {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-  }
-  .msg-tail.sent .tail-shape {
-    top: -2px;
-    left: -8px;
-    background: #dcf8c6;
-  }
-  .msg-tail.received .tail-shape {
-    top: -2px;
-    right: -8px;
-    background: #fff;
+    border-radius: 4px 12px 2px 4px;
   }
 
   .message-img {
@@ -1199,17 +1159,6 @@ function renderMessages() {
     }
 
     div.appendChild(footer);
-
-    // Add tail to last message in a group
-    if (isLastInGroup) {
-      const tail = document.createElement('div');
-      tail.className = 'msg-tail ' + msg.sender;
-      const tailShape = document.createElement('div');
-      tailShape.className = 'tail-shape';
-      tail.appendChild(tailShape);
-      div.appendChild(tail);
-    }
-
     chatArea.appendChild(div);
   });
 
