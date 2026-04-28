@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp 聊天截图生成器 - iPhone 17</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', 'Noto Sans SC', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  .app-container {
+    display: flex;
+    height: 100vh;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ====== 左侧编辑面板 ====== */
+  .editor-panel {
+    width: 400px;
+    min-width: 400px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .editor-panel h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .editor-panel h2 svg { width: 20px; height: 20px; }
+
+  .panel-section {
+    background: rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .panel-section h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .form-row:last-child { margin-bottom: 0; }
+
+  .form-row label {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+  }
+
+  .form-row input[type="text"],
+  .form-row input[type="file"],
+  .form-row select,
+  .form-row textarea {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-row input:focus,
+  .form-row select:focus,
+  .form-row textarea:focus { border-color: #25d366; }
+
+  .form-row input::placeholder,
+  .form-row textarea::placeholder { color: rgba(255,255,255,0.3); }
+
+  .form-row textarea { resize: vertical; min-height: 60px; }
+  .form-row select { cursor: pointer; }
+  .form-row select option { background: #1a1a2e; color: #fff; }
+
+  .btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+  }
+
+  .btn-secondary {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+
+  .btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-group .btn { flex: 1; min-width: 80px; }
+
+  /* ====== 消息列表 ====== */
+  .message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .message-list::-webkit-scrollbar { width: 4px; }
+  .message-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+  }
+
+  .message-item {
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .message-item:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .message-item.selected {
+    border-color: #25d366;
+    background: rgba(37, 211, 102, 0.08);
+  }
+
+  .message-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .message-item-sender {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .message-item-sender.me {
+    background: rgba(220, 248, 198, 0.2);
+    color: #dcf8c6;
+  }
+
+  .message-item-sender.them {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+
+  .message-item-time {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .message-item-text {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .message-item-img {
+    max-width: 100%;
+    max-height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .message-item-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  .message-item:hover .message-item-actions { opacity: 1; }
+
+  .message-item-actions button {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(239, 68, 68, 0.8);
+    color: #fff;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ====== 中间预览区 ====== */
+  .preview-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .preview-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .preview-actions .btn {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+
+  .lang-toggle {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+  }
+
+  .lang-toggle button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .lang-toggle button.active {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: #fff;
+  }
+
+  /* ====== iPhone 17 模拟器 ====== */
+  .iphone-frame {
+    width: 390px;
+    min-width: 390px;
+    height: 844px;
+    background: #000;
+    border-radius: 54px;
+    padding: 14px;
+    box-shadow:
+      0 0 0 2px #2a2a2a,
+      0 25px 80px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.08) inset;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 灵动岛 */
+  .dynamic-island {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 37px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dynamic-island::before,
+  .dynamic-island::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1a1a1a;
+  }
+
+  /* 屏幕 */
+  .iphone-screen {
+    width: 100%;
+    height: 100%;
+    background: #efeae2;
+    border-radius: 44px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .iphone-screen.arabic {
+    direction: rtl;
+    font-family: 'Cairo', -apple-system, sans-serif;
+  }
+
+  /* 状态栏 */
+  .status-bar {
+    height: 54px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 24px 8px;
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .iphone-screen.arabic .status-bar {
+    flex-direction: row-reverse;
+    padding: 0 30px 8px 24px;
+  }
+
+  .status-time {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.3px;
+  }
+
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .iphone-screen.arabic .status-icons {
+    flex-direction: row-reverse;
+  }
+
+  .status-icons svg { width: 18px; height: 18px; }
+
+  /* 聊天头部 */
+  .chat-header {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(20px);
+    padding: 6px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    z-index: 10;
+  }
+
+  .iphone-screen.arabic .chat-header {
+    flex-direction: row-reverse;
+  }
+
+  .back-btn {
+    color: #007aff;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .iphone-screen.arabic .back-btn {
+    transform: scaleX(-1);
+  }
+
+  .header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #ddd;
+  }
+
+  .header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .iphone-screen.arabic .header-info {
+    text-align: right;
+  }
+
+  .header-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #000;
+    line-height: 1.2;
+  }
+
+  .header-status {
+    font-size: 12px;
+    color: #8e8e93;
+    line-height: 1.3;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 16px;
+    color: #007aff;
+  }
+
+  .iphone-screen.arabic .header-actions {
+    flex-direction: row-reverse;
+  }
+
+  .header-actions svg { width: 22px; height: 22px; }
+
+  /* 聊天区域 */
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d1d7db' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .chat-area::-webkit-scrollbar { display: none; }
+
+  /* 日期分隔线 */
+  .date-separator {
+    text-align: center;
+    margin: 8px 0;
+  }
+
+  .date-separator span {
+    background: rgba(225, 245, 254, 0.92);
+    color: #54656f;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+
+  /* 消息气泡 */
+  .message {
+    max-width: 78%;
+    padding: 7px 10px;
+    border-radius: 14px;
+    font-size: 14.5px;
+    line-height: 1.35;
+    word-wrap: break-word;
+    position: relative;
+    animation: msgIn 0.2s ease-out;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.sent {
+    align-self: flex-end;
+    background: #d9fdd3;
+    color: #111b21;
+    border-bottom-right-radius: 4px;
+  }
+
+  .iphone-screen.arabic .message.sent {
+    align-self: flex-start;
+    border-bottom-right-radius: 14px;
+    border-bottom-left-radius: 4px;
+  }
+
+  .message.received {
+    align-self: flex-start;
+    background: #fff;
+    color: #111b21;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+
+  .iphone-screen.arabic .message.received {
+    align-self: flex-end;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 4px;
+  }
+
+  .message-img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .message-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+  }
+
+  .iphone-screen.arabic .message-footer {
+    flex-direction: row-reverse;
+  }
+
+  .message-time {
+    font-size: 11px;
+    color: #667781;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .message-status {
+    display: flex;
+    align-items: center;
+  }
+
+  .message-status svg { width: 16px; height: 16px; }
+
+  /* 底部输入栏 */
+  .input-bar {
+    background: #f6f6f6;
+    padding: 6px 10px 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .iphone-screen.arabic .input-bar {
+    flex-direction: row-reverse;
+  }
+
+  .input-bar .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #54656f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+  }
+
+  .input-field {
+    flex: 1;
+    background: #fff;
+    border: none;
+    border-radius: 18px;
+    padding: 8px 14px;
+    font-size: 15px;
+    color: #111b21;
+    outline: none;
+  }
+
+  .input-field::placeholder { color: #8696a0; }
+
+  /* 底部横条 */
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 130px;
+    height: 5px;
+    background: #000;
+    border-radius: 3px;
+    z-index: 100;
+  }
+
+  /* 响应式 */
+  @media (max-width: 900px) {
+    .app-container { flex-direction: column; }
+    .editor-panel {
+      width: 100%;
+      min-width: auto;
+      max-height: 45vh;
+      border-right: none;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .iphone-frame {
+      transform: scale(0.85);
+      transform-origin: top center;
+    }
+  }
+
+  /* 打印模式：只显示手机 */
+  @media print {
+    body { background: #fff !important; }
+    .editor-panel { display: none !important; }
+    .preview-actions { display: none !important; }
+    .preview-area {
+      padding: 0 !important;
+      background: #fff !important;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .iphone-frame {
+      box-shadow: none !important;
+      margin: 0 auto;
+      transform: none !important;
+    }
+  }
+
+  body.print-mode .editor-panel { display: none !important; }
+  body.print-mode .preview-actions { display: none !important; }
+  body.print-mode {
+    background: #fff !important;
+  }
+  body.print-mode .preview-area {
+    background: #fff !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+  }
+  body.print-mode .iphone-frame {
+    box-shadow: none !important;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- 编辑面板 -->
+  <div class="editor-panel">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      WhatsApp 聊天生成器
+    </h2>
+
+    <!-- 语言切换 -->
+    <div class="panel-section">
+      <h3>界面语言</h3>
+      <div class="lang-toggle" style="width:100%">
+        <button id="btnLangZh" class="active" onclick="setLanguage('zh')">中文</button>
+        <button id="btnLangAr" onclick="setLanguage('ar')">العربية</button>
+      </div>
+    </div>
+
+    <!-- 聊天设置 -->
+    <div class="panel-section">
+      <h3>聊天设置</h3>
+      <div class="form-row">
+        <label>对方名字</label>
+        <input type="text" id="chatName" value="Dr. Ahmed" placeholder="输入对方名字">
+      </div>
+      <div class="form-row">
+        <label>在线状态</label>
+        <select id="chatStatus">
+          <option value="online">在线</option>
+          <option value="online_1h">1小时前在线</option>
+          <option value="online_2h">2小时前在线</option>
+          <option value="online_today">今天在线</option>
+          <option value="online_yesterday">昨天在线</option>
+          <option value="typing">正在输入...</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>头像</label>
+        <input type="file" id="avatarInput" accept="image/*">
+      </div>
+      <div class="form-row">
+        <label>手机时间</label>
+        <input type="text" id="phoneTime" value="14:30" placeholder="例如: 14:30">
+      </div>
+      <div class="form-row">
+        <label>聊天日期</label>
+        <input type="text" id="chatDate" value="今天" placeholder="例如: 今天">
+      </div>
+    </div>
+
+    <!-- 添加消息 -->
+    <div class="panel-section">
+      <h3>添加消息</h3>
+      <div class="form-row">
+        <label>发送方</label>
+        <select id="msgSender">
+          <option value="sent">我 (绿色)</option>
+          <option value="received">对方 (白色)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>消息内容</label>
+        <textarea id="msgText" placeholder="输入消息..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>消息图片</label>
+        <input type="file" id="msgImage" accept="image/*">
+      </div>
+      <div class="form-row">
+        <label>时间</label>
+        <input type="text" id="msgTime" value="14:32" placeholder="例如: 14:32">
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="addMessage()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          添加
+        </button>
+        <button class="btn btn-secondary" onclick="clearMessages()">清空</button>
+      </div>
+    </div>
+
+    <!-- 消息列表 -->
+    <div class="panel-section">
+      <h3>消息列表 (点击选中)</h3>
+      <div class="message-list" id="messageList"></div>
+      <div class="btn-group" style="margin-top: 12px;">
+        <button class="btn btn-danger" onclick="deleteSelected()">删除选中</button>
+        <button class="btn btn-secondary" onclick="moveUp()">上移</button>
+        <button class="btn btn-secondary" onclick="moveDown()">下移</button>
+      </div>
+    </div>
+
+    <!-- 导出 -->
+    <div class="panel-section">
+      <h3>导出截图</h3>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="exportScreenshot()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          保存截图
+        </button>
+        <button class="btn btn-secondary" onclick="loadDemo()">加载示例</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 预览区 -->
+  <div class="preview-area">
+    <div class="preview-actions">
+      <button class="btn btn-secondary" onclick="toggleTimeFormat()">切换 12/24 小时</button>
+      <button class="btn btn-secondary" onclick="toggleReadStatus()">切换已读/未读</button>
+    </div>
+
+    <div class="iphone-frame" id="captureTarget">
+      <!-- 灵动岛 -->
+      <div class="dynamic-island"></div>
+
+      <!-- 屏幕 -->
+      <div class="iphone-screen" id="iphoneScreen">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+          <div class="status-time" id="statusTime">14:30</div>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71 0 .28.11.53.29.71l11 11c.39.39 1.02.39 1.41 0l11-11c.18-.18.29-.43.29-.71 0-.28-.11-.53-.29-.71C20.66 4.78 16.54 3 12 3z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 4h-3V2h-4v2H7v18h10V4zm-4 16h-2v-2h2v2zm0-4h-2V8h2v8z"/></svg>
+          </div>
+        </div>
+
+        <!-- 聊天头部 -->
+        <div class="chat-header">
+          <div class="back-btn" id="backBtn">&#x3008;</div>
+          <img class="header-avatar" id="headerAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Ccircle cx='18' cy='18' r='18' fill='%23ddd'/%3E%3Ctext x='18' y='23' text-anchor='middle' fill='%23999' font-size='14'%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E" alt="avatar">
+          <div class="header-info">
+            <div class="header-name" id="headerName">Dr. Ahmed</div>
+            <div class="header-status" id="headerStatus">متصل الآن</div>
+          </div>
+          <div class="header-actions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </div>
+        </div>
+
+        <!-- 聊天区域 -->
+        <div class="chat-area" id="chatArea">
+          <div class="date-separator"><span id="dateLabel">اليوم</span></div>
+        </div>
+
+        <!-- 输入栏 -->
+        <div class="input-bar">
+          <button class="icon-btn" id="emojiBtn">😊</button>
+          <button class="icon-btn" id="plusBtn">+</button>
+          <input class="input-field" id="inputPlaceholder" placeholder="رسالة" readonly>
+          <button class="icon-btn" id="micBtn">🎤</button>
+        </div>
+      </div>
+
+      <!-- 底部横条 -->
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== 数据 ======
+let messages = [];
+let selectedIndex = -1;
+let is24Hour = true;
+let showRead = true;
+let currentLang = 'zh';
+
+const i18n = {
+  zh: {
+    online: '在线',
+    online_1h: '1小时前在线',
+    online_2h: '2小时前在线',
+    online_today: '今天在线',
+    online_yesterday: '昨天在线',
+    typing: '正在输入...',
+    today: '今天',
+    yesterday: '昨天',
+    inputPlaceholder: '消息',
+    backBtn: '〈',
+    senderMe: '我',
+    senderThem: '对方'
+  },
+  ar: {
+    online: 'متصل الآن',
+    online_1h: 'متصل منذ ساعة',
+    online_2h: 'متصل منذ ساعتين',
+    online_today: 'متصل اليوم',
+    online_yesterday: 'متصل بالأمس',
+    typing: 'يكتب الآن...',
+    today: 'اليوم',
+    yesterday: 'الأمس',
+    inputPlaceholder: 'رسالة',
+    backBtn: '〉',
+    senderMe: 'أنا',
+    senderThem: 'الطرف الآخر'
+  }
+};
+
+// ====== 初始化 ======
+document.addEventListener('DOMContentLoaded', () => {
+  setLanguage('ar'); // 默认阿拉伯语
+  loadDemo(); // 加载示例数据
+
+  document.getElementById('chatName').addEventListener('input', updateHeader);
+  document.getElementById('chatStatus').addEventListener('change', updateHeader);
+  document.getElementById('phoneTime').addEventListener('input', updateStatusBar);
+  document.getElementById('chatDate').addEventListener('input', updateDate);
+
+  document.getElementById('avatarInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('headerAvatar').src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+});
+
+// ====== 语言切换 ======
+function setLanguage(lang) {
+  currentLang = lang;
+
+  document.getElementById('btnLangZh').classList.toggle('active', lang === 'zh');
+  document.getElementById('btnLangAr').classList.toggle('active', lang === 'ar');
+
+  const screen = document.getElementById('iphoneScreen');
+  if (lang === 'ar') {
+    screen.classList.add('arabic');
+    document.getElementById('backBtn').textContent = i18n.ar.backBtn;
+    document.getElementById('inputPlaceholder').placeholder = i18n.ar.inputPlaceholder;
+  } else {
+    screen.classList.remove('arabic');
+    document.getElementById('backBtn').textContent = i18n.zh.backBtn;
+    document.getElementById('inputPlaceholder').placeholder = i18n.zh.inputPlaceholder;
+  }
+
+  updateHeader();
+  updateDate();
+  loadDemo();
+}
+
+// ====== 更新 UI ======
+function updateHeader() {
+  document.getElementById('headerName').textContent = document.getElementById('chatName').value || 'Dr. Ahmed';
+
+  const statusKey = document.getElementById('chatStatus').value;
+  const statusText = i18n[currentLang][statusKey] || i18n[currentLang].online;
+  document.getElementById('headerStatus').textContent = statusText;
+}
+
+function updateStatusBar() {
+  document.getElementById('statusTime').textContent = document.getElementById('phoneTime').value || '14:30';
+}
+
+function updateDate() {
+  const val = document.getElementById('chatDate').value;
+  const dateText = (val === '今天' && currentLang === 'ar') ? i18n.ar.today :
+                   (val === '昨天' && currentLang === 'ar') ? i18n.ar.yesterday :
+                   (val === 'اليوم' && currentLang === 'zh') ? i18n.zh.today :
+                   (val === 'الأمس' && currentLang === 'zh') ? i18n.zh.yesterday :
+                   val || i18n[currentLang].today;
+  document.getElementById('dateLabel').textContent = dateText;
+}
+
+// ====== 消息操作 ======
+function addMessage() {
+  const sender = document.getElementById('msgSender').value;
+  const text = document.getElementById('msgText').value.trim();
+  const time = document.getElementById('msgTime').value || formatTime(new Date());
+  const imageFile = document.getElementById('msgImage').files[0];
+
+  if (!text && !imageFile) {
+    alert(currentLang === 'ar' ? 'أدخل نصًا أو اختر صورة' : '请输入消息内容或选择图片');
+    return;
+  }
+
+  const msg = { id: Date.now(), sender, text, time, image: null };
+
+  if (imageFile) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      msg.image = e.target.result;
+      messages.push(msg);
+      renderMessages();
+      renderMessageList();
+      clearMsgInputs();
+    };
+    reader.readAsDataURL(imageFile);
+  } else {
+    messages.push(msg);
+    renderMessages();
+    renderMessageList();
+    clearMsgInputs();
+  }
+}
+
+function clearMsgInputs() {
+  document.getElementById('msgText').value = '';
+  document.getElementById('msgImage').value = '';
+}
+
+function deleteSelected() {
+  if (selectedIndex < 0 || selectedIndex >= messages.length) return;
+  messages.splice(selectedIndex, 1);
+  selectedIndex = -1;
+  renderMessages();
+  renderMessageList();
+}
+
+function moveUp() {
+  if (selectedIndex <= 0) return;
+  [messages[selectedIndex], messages[selectedIndex - 1]] = [messages[selectedIndex - 1], messages[selectedIndex]];
+  selectedIndex--;
+  renderMessages();
+  renderMessageList();
+}
+
+function moveDown() {
+  if (selectedIndex < 0 || selectedIndex >= messages.length - 1) return;
+  [messages[selectedIndex], messages[selectedIndex + 1]] = [messages[selectedIndex + 1], messages[selectedIndex]];
+  selectedIndex++;
+  renderMessages();
+  renderMessageList();
+}
+
+function clearMessages() {
+  const msg = currentLang === 'ar' ? 'هل أنت متأكد من مسح جميع الرسائل؟' : '确定要清空所有消息吗？';
+  if (confirm(msg)) {
+    messages = [];
+    selectedIndex = -1;
+    renderMessages();
+    renderMessageList();
+  }
+}
+
+function selectMessage(index) {
+  selectedIndex = index;
+  renderMessageList();
+}
+
+// ====== 渲染 ======
+function renderMessages() {
+  const chatArea = document.getElementById('chatArea');
+  const dateVal = document.getElementById('chatDate').value;
+  const dateText = (dateVal === '今天' && currentLang === 'ar') ? i18n.ar.today :
+                   (dateVal === '昨天' && currentLang === 'ar') ? i18n.ar.yesterday :
+                   (dateVal === 'اليوم' && currentLang === 'zh') ? i18n.zh.today :
+                   (dateVal === 'الأمس' && currentLang === 'zh') ? i18n.zh.yesterday :
+                   dateVal || i18n[currentLang].today;
+
+  chatArea.innerHTML = '<div class="date-separator"><span id="dateLabel">' + dateText + '</span></div>';
+
+  messages.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = 'message ' + msg.sender;
+
+    if (msg.image) {
+      const img = document.createElement('img');
+      img.className = 'message-img';
+      img.src = msg.image;
+      img.style.maxWidth = '240px';
+      div.appendChild(img);
+    }
+
+    if (msg.text) {
+      const textSpan = document.createElement('span');
+      textSpan.textContent = msg.text;
+      div.appendChild(textSpan);
+    }
+
+    const footer = document.createElement('div');
+    footer.className = 'message-footer';
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'message-time';
+    timeSpan.textContent = msg.time;
+    footer.appendChild(timeSpan);
+
+    if (msg.sender === 'sent') {
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'message-status';
+      if (showRead) {
+        statusDiv.innerHTML = '<svg viewBox="0 0 16 16" fill="#53bdeb"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97zm2.94 0a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02l-4.62-4.62a.75.75 0 1 1 1.06-1.06l4.08 4.08L11.91 4.97z"/></svg>';
+      } else {
+        statusDiv.innerHTML = '<svg viewBox="0 0 16 16" fill="#667781"><path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.97 4.97z"/></svg>';
+      }
+      footer.appendChild(statusDiv);
+    }
+
+    div.appendChild(footer);
+    chatArea.appendChild(div);
+  });
+
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function renderMessageList() {
+  const list = document.getElementById('messageList');
+  list.innerHTML = '';
+  const labels = i18n[currentLang];
+
+  messages.forEach((msg, i) => {
+    const item = document.createElement('div');
+    item.className = 'message-item' + (i === selectedIndex ? ' selected' : '');
+    item.onclick = () => selectMessage(i);
+
+    const header = document.createElement('div');
+    header.className = 'message-item-header';
+
+    const sender = document.createElement('span');
+    sender.className = 'message-item-sender ' + msg.sender;
+    sender.textContent = msg.sender === 'sent' ? labels.senderMe : labels.senderThem;
+    header.appendChild(sender);
+
+    const time = document.createElement('span');
+    time.className = 'message-item-time';
+    time.textContent = msg.time;
+    header.appendChild(time);
+
+    item.appendChild(header);
+
+    if (msg.text) {
+      const text = document.createElement('div');
+      text.className = 'message-item-text';
+      text.textContent = msg.text;
+      item.appendChild(text);
+    }
+
+    if (msg.image) {
+      const img = document.createElement('img');
+      img.className = 'message-item-img';
+      img.src = msg.image;
+      item.appendChild(img);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'message-item-actions';
+    actions.innerHTML = '<button onclick="event.stopPropagation(); deleteMessageByIndex(' + i + ')">&#10005;</button>';
+    item.appendChild(actions);
+
+    list.appendChild(item);
+  });
+}
+
+function deleteMessageByIndex(index) {
+  messages.splice(index, 1);
+  if (selectedIndex === index) selectedIndex = -1;
+  else if (selectedIndex > index) selectedIndex--;
+  renderMessages();
+  renderMessageList();
+}
+
+// ====== 工具函数 ======
+function formatTime(date) {
+  const h = String(date.getHours()).padStart(2, '0');
+  const m = String(date.getMinutes()).padStart(2, '0');
+  return h + ':' + m;
+}
+
+function toggleTimeFormat() {
+  is24Hour = !is24Hour;
+  const timeInput = document.getElementById('msgTime');
+  const phoneTime = document.getElementById('phoneTime');
+
+  if (!is24Hour) {
+    timeInput.value = convertTo12Hour(timeInput.value);
+    phoneTime.value = convertTo12Hour(phoneTime.value);
+  } else {
+    timeInput.value = convertTo24Hour(timeInput.value);
+    phoneTime.value = convertTo24Hour(phoneTime.value);
+  }
+
+  messages.forEach(m => {
+    if (!is24Hour) {
+      m.time = convertTo12Hour(m.time);
+    } else {
+      m.time = convertTo24Hour(m.time);
+    }
+  });
+
+  renderMessages();
+  renderMessageList();
+  updateStatusBar();
+}
+
+function convertTo12Hour(timeStr) {
+  const [h, m] = timeStr.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+}
+
+function convertTo24Hour(timeStr) {
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return timeStr;
+  let h = parseInt(match[1]);
+  const m = match[2];
+  const ampm = match[3].toUpperCase();
+  if (ampm === 'PM' && h !== 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return String(h).padStart(2, '0') + ':' + m;
+}
+
+function toggleReadStatus() {
+  showRead = !showRead;
+  renderMessages();
+}
+
+// ====== 导出截图 ======
+function exportScreenshot() {
+  const target = document.getElementById('captureTarget');
+
+  html2canvas(target, {
+    scale: 3,
+    backgroundColor: null,
+    useCORS: true,
+    allowTaint: true,
+    logging: false,
+    foreignObjectRendering: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'whatsapp-chat-' + currentLang + '-' + Date.now() + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(err => {
+    // Fallback: print dialog
+    const isFileProtocol = window.location.protocol === 'file:';
+    if (isFileProtocol) {
+      const msg = currentLang === 'ar'
+        ? 'لا يمكن الحفظ مباشرة من ملف محلي. سيتم فتح نافذة الطباعة، يرجى اختيار "حفظ كـ PDF".'
+        : '本地文件无法直接保存，即将打开打印窗口，请选择"另存为 PDF"。';
+      if (confirm(msg)) {
+        document.body.classList.add('print-mode');
+        window.print();
+        setTimeout(() => document.body.classList.remove('print-mode'), 500);
+      }
+    } else {
+      alert(currentLang === 'ar' ? 'فشل التقاط الصورة: ' + err.message : '截图失败: ' + err.message);
+    }
+  });
+}
+
+// ====== 示例数据 ======
+function loadDemo() {
+  if (currentLang === 'ar') {
+    document.getElementById('chatName').value = 'د. أحمد';
+    document.getElementById('chatStatus').value = 'online';
+    document.getElementById('phoneTime').value = '14:30';
+    document.getElementById('chatDate').value = 'اليوم';
+    document.getElementById('msgTime').value = '14:32';
+
+    messages = [
+      { id: 1, sender: 'received', text: 'مرحباً، كيف حالك؟ هل لاحظت أي تحسن بعد العلاج؟', time: '14:28', image: null },
+      { id: 2, sender: 'sent', text: 'مرحباً دكتور! بعد دورتين من العلاج، شعرت بتحسن ملحوظ.', time: '14:30', image: null },
+      { id: 3, sender: 'sent', text: 'المشاكل السابقة اختفت تقريباً، شكراً جزيلاً!', time: '14:31', image: null },
+      { id: 4, sender: 'received', text: 'ممتاز، استمر في تناول العلاج حسب الجرعة المحددة. تواصل معي إذا واجهت أي مشكلة.', time: '14:32', image: null },
+      { id: 5, sender: 'sent', text: 'حسناً سأستمر. المنتج فعّال حقاً 👍', time: '14:33', image: null },
+    ];
+  } else {
+    document.getElementById('chatName').value = 'Dr. Ahmed';
+    document.getElementById('chatStatus').value = 'online';
+    document.getElementById('phoneTime').value = '14:30';
+    document.getElementById('chatDate').value = '今天';
+    document.getElementById('msgTime').value = '14:32';
+
+    messages = [
+      { id: 1, sender: 'received', text: '你好，最近感觉怎么样？治疗后有什么改善吗？', time: '14:28', image: null },
+      { id: 2, sender: 'sent', text: '医生您好！用了两个疗程后，明显感觉到改善了。', time: '14:30', image: null },
+      { id: 3, sender: 'sent', text: '之前的问题基本都解决了，非常感谢！', time: '14:31', image: null },
+      { id: 4, sender: 'received', text: '太好了，继续按疗程服用。如果有任何问题随时联系我。', time: '14:32', image: null },
+      { id: 5, sender: 'sent', text: '好的，我会继续的。这个产品效果真的很好 👍', time: '14:33', image: null },
+    ];
+  }
+
+  selectedIndex = -1;
+  updateHeader();
+  updateStatusBar();
+  updateDate();
+  renderMessages();
+  renderMessageList();
+}
+</script>
+
+</body>
+</html>
