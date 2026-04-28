@@ -329,7 +329,7 @@
   /* 灵动岛 */
   .dynamic-island {
     position: absolute;
-    top: 14px;
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 126px;
@@ -357,7 +357,6 @@
     width: 100%;
     height: 100%;
     background: #efeae2;
-    border-radius: 44px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -406,7 +405,7 @@
     flex-direction: row-reverse;
   }
 
-  .status-icons svg { width: 18px; height: 18px; }
+  .status-icons svg { height: 14px; width: auto; }
 
   /* 聊天头部 */
   .chat-header {
@@ -610,6 +609,13 @@
     font-size: 20px;
   }
 
+  .input-bar .send-btn {
+    background: #00a884;
+    color: #fff;
+    width: 34px;
+    height: 34px;
+  }
+
   .input-field {
     flex: 1;
     background: #fff;
@@ -806,18 +812,19 @@
       <button class="btn btn-secondary" onclick="toggleReadStatus()">切换已读/未读</button>
     </div>
 
-    <div class="iphone-frame" id="captureTarget">
-      <!-- 灵动岛 -->
-      <div class="dynamic-island"></div>
-
+    <div class="iphone-frame">
       <!-- 屏幕 -->
-      <div class="iphone-screen" id="iphoneScreen">
+      <div class="iphone-screen" id="captureTarget">
+        <!-- 灵动岛 -->
+        <div class="dynamic-island"></div>
+
         <!-- 状态栏 -->
         <div class="status-bar">
           <div class="status-time" id="statusTime">14:30</div>
           <div class="status-icons">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71 0 .28.11.53.29.71l11 11c.39.39 1.02.39 1.41 0l11-11c.18-.18.29-.43.29-.71 0-.28-.11-.53-.29-.71C20.66 4.78 16.54 3 12 3z"/></svg>
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 4h-3V2h-4v2H7v18h10V4zm-4 16h-2v-2h2v2zm0-4h-2V8h2v8z"/></svg>
+            <svg viewBox="0 0 18 12" width="18" height="12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="5" y="5" width="3" height="7" rx="0.5"/><rect x="10" y="2" width="3" height="10" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5"/></svg>
+            <svg viewBox="0 0 16 12" width="16" height="12" fill="currentColor"><path d="M8 0C4.5 0 1.4 1.6 0 4.2l.8.6C2 2.5 4.8 1.2 8 1.2s6 1.3 7.2 3.6l.8-.6C14.6 1.6 11.5 0 8 0z"/><path d="M8 3.5c-2.3 0-4.4 1-5.7 2.7l.8.6C4.2 5.5 6 4.6 8 4.6s3.8.9 4.9 2.2l.8-.6C12.4 4.5 10.3 3.5 8 3.5z"/><circle cx="8" cy="10" r="1.5"/></svg>
+            <svg viewBox="0 0 27 12" width="27" height="12"><rect x="0.5" y="0.5" width="23" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="19" height="8" rx="1.5" fill="currentColor"/><path d="M25 4v4a1 1 0 0 0 .5-.87V4.87A1 1 0 0 0 25 4z" fill="currentColor"/></svg>
           </div>
         </div>
 
@@ -845,12 +852,14 @@
           <button class="icon-btn" id="emojiBtn">😊</button>
           <button class="icon-btn" id="plusBtn">+</button>
           <input class="input-field" id="inputPlaceholder" placeholder="رسالة" readonly>
-          <button class="icon-btn" id="micBtn">🎤</button>
+          <button class="icon-btn send-btn" id="micBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
         </div>
-      </div>
 
-      <!-- 底部横条 -->
-      <div class="home-indicator"></div>
+        <!-- 底部横条 -->
+        <div class="home-indicator"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -923,7 +932,7 @@ function setLanguage(lang) {
   document.getElementById('btnLangZh').classList.toggle('active', lang === 'zh');
   document.getElementById('btnLangAr').classList.toggle('active', lang === 'ar');
 
-  const screen = document.getElementById('iphoneScreen');
+  const screen = document.querySelector('.iphone-screen');
   if (lang === 'ar') {
     screen.classList.add('arabic');
     document.getElementById('backBtn').textContent = i18n.ar.backBtn;
