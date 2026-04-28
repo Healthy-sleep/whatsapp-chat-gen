@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WhatsApp 聊天截图生成器 - iPhone 17</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* System fonts - no external loading for screenshot compatibility */
+</style>
 <script>
 /*!
  * html2canvas 1.4.1 <https://html2canvas.hertzen.com>
@@ -30,7 +32,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', 'Noto Sans SC', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     min-height: 100vh;
     color: #fff;
@@ -381,7 +383,7 @@
 
   .iphone-screen.arabic {
     direction: rtl;
-    font-family: 'Cairo', -apple-system, sans-serif;
+    font-family: -apple-system, 'Geeza Pro', Arial, sans-serif;
   }
 
   /* 状态栏 */
@@ -1231,7 +1233,7 @@ function exportScreenshot() {
     useCORS: true,
     allowTaint: true,
     logging: false,
-    foreignObjectRendering: true,
+    foreignObjectRendering: false,
     scrollX: 0,
     scrollY: 0
   }).then(function(canvas) {
