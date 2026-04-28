@@ -1016,15 +1016,15 @@ function setLanguage(lang) {
   document.getElementById('btnLangZh').classList.toggle('active', lang === 'zh');
   document.getElementById('btnLangAr').classList.toggle('active', lang === 'ar');
 
+  // Layout always LTR regardless of language
   const screen = document.querySelector('.iphone-screen');
+  screen.classList.remove('arabic');
+  screen.setAttribute('dir', 'ltr');
+
   if (lang === 'ar') {
-    screen.classList.add('arabic');
-    screen.setAttribute('dir', 'rtl');
     document.getElementById('backBtn').textContent = i18n.ar.backBtn;
     document.getElementById('inputPlaceholder').placeholder = i18n.ar.inputPlaceholder;
   } else {
-    screen.classList.remove('arabic');
-    screen.setAttribute('dir', 'ltr');
     document.getElementById('backBtn').textContent = i18n.zh.backBtn;
     document.getElementById('inputPlaceholder').placeholder = i18n.zh.inputPlaceholder;
   }
