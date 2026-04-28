@@ -537,67 +537,25 @@
     align-self: flex-end;
     background: #dcf8c6;
     color: #111b21;
-    border-bottom-right-radius: 2px;
-  }
-
-  .message.sent::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: -6px;
-    width: 12px;
-    height: 16px;
-    background: #dcf8c6;
-    border-bottom-left-radius: 14px;
-    box-shadow: -2px 2px 2px rgba(0,0,0,0.03);
+    border-radius: 12px 12px 2px 12px;
   }
 
   .iphone-screen.arabic .message.sent {
     align-self: flex-start;
-    border-bottom-right-radius: 12px;
-    border-bottom-left-radius: 2px;
-  }
-
-  .iphone-screen.arabic .message.sent::after {
-    right: auto;
-    left: -6px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 14px;
-    box-shadow: 2px 2px 2px rgba(0,0,0,0.03);
+    border-radius: 12px 12px 12px 2px;
   }
 
   .message.received {
     align-self: flex-start;
     background: #fff;
     color: #111b21;
-    border-bottom-left-radius: 2px;
+    border-radius: 12px 12px 12px 2px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-  }
-
-  .message.received::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -6px;
-    width: 12px;
-    height: 16px;
-    background: #fff;
-    border-bottom-right-radius: 14px;
-    box-shadow: 2px 2px 2px rgba(0,0,0,0.03);
   }
 
   .iphone-screen.arabic .message.received {
     align-self: flex-end;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 2px;
-  }
-
-  .iphone-screen.arabic .message.received::after {
-    left: auto;
-    right: -6px;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 14px;
-    box-shadow: -2px 2px 2px rgba(0,0,0,0.03);
+    border-radius: 12px 12px 2px 12px;
   }
 
   .message-img {
