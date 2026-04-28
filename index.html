@@ -337,11 +337,6 @@
     position: relative;
   }
 
-  .iphone-screen.arabic {
-    direction: rtl;
-    font-family: -apple-system, 'Geeza Pro', Arial, sans-serif;
-  }
-
   /* 状态栏 */
   .status-bar {
     height: 47px;
@@ -412,10 +407,6 @@
     min-height: 50px;
   }
 
-  .iphone-screen.arabic .chat-header {
-    flex-direction: row-reverse;
-  }
-
   .back-btn {
     color: #007aff;
     font-size: 24px;
@@ -423,10 +414,6 @@
     line-height: 1;
     padding: 0 2px;
     cursor: default;
-  }
-
-  .iphone-screen.arabic .back-btn {
-    /* Arabic back button (〉) is already pointing right, no flip needed */
   }
 
   .header-avatar {
@@ -440,10 +427,6 @@
   .header-info {
     flex: 1;
     min-width: 0;
-  }
-
-  .iphone-screen.arabic .header-info {
-    text-align: right;
   }
 
   .header-name {
@@ -463,10 +446,6 @@
     display: flex;
     gap: 18px;
     align-items: center;
-  }
-
-  .iphone-screen.arabic .header-actions {
-    flex-direction: row-reverse;
   }
 
   .header-actions svg { width: 24px; height: 24px; }
@@ -548,23 +527,11 @@
     border-radius: 12px 12px 2px 12px;
   }
 
-  .iphone-screen.arabic .message.sent {
-    margin-left: 0;
-    margin-right: auto;
-    border-radius: 12px 12px 12px 2px;
-  }
-
   .message.received {
     margin-right: auto;
     background: #fff;
     color: #111b21;
     border-radius: 12px 12px 12px 2px;
-  }
-
-  .iphone-screen.arabic .message.received {
-    margin-right: 0;
-    margin-left: auto;
-    border-radius: 12px 12px 2px 12px;
   }
 
   /* 连续消息堆叠 - 中间消息顶部更平，左侧也更平 */
@@ -575,12 +542,6 @@
   .message.received + .message.received {
     border-radius: 12px 4px 4px 2px;
     margin-top: 1px;
-  }
-  .iphone-screen.arabic .message.sent + .message.sent {
-    border-radius: 12px 4px 4px 2px;
-  }
-  .iphone-screen.arabic .message.received + .message.received {
-    border-radius: 4px 12px 2px 4px;
   }
 
   .message-img {
@@ -596,10 +557,6 @@
     align-items: flex-end;
     gap: 3px;
     margin-top: 2px;
-  }
-
-  .iphone-screen.arabic .message-footer {
-    flex-direction: row-reverse;
   }
 
   .message-time {
@@ -660,10 +617,6 @@
     gap: 6px;
     border-top: 1px solid rgba(0,0,0,0.05);
     min-height: 48px;
-  }
-
-  .iphone-screen.arabic .input-bar {
-    flex-direction: row-reverse;
   }
 
   .input-bar .icon-btn {
