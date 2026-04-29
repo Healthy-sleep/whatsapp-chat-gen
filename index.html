@@ -880,7 +880,21 @@
       </div>
       <div class="form-row">
         <label>聊天日期</label>
-        <input type="text" id="chatDate" value="今天" placeholder="例如: 今天">
+        <select id="chatDate">
+          <option value="今天">今天</option>
+          <option value="昨天">昨天</option>
+          <option value="2026年4月28日">2026年4月28日</option>
+          <option value="2026年4月25日">2026年4月25日</option>
+          <option value="2026年4月20日">2026年4月20日</option>
+          <option value="2026年4月15日">2026年4月15日</option>
+          <option value="2026年4月1日">2026年4月1日</option>
+          <option value="2026年3月25日">2026年3月25日</option>
+          <option value="custom">自定义...</option>
+        </select>
+      </div>
+      <div class="form-row" id="customDateRow" style="display:none">
+        <label>自定义日期</label>
+        <input type="text" id="customDateInput" placeholder="例如: 2026年3月15日">
       </div>
     </div>
 
@@ -1051,7 +1065,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('chatStatus').addEventListener('change', updateHeader);
   document.getElementById('phoneTime').addEventListener('input', updateStatusBar);
   document.getElementById('carrierInput').addEventListener('input', updateStatusBar);
-  document.getElementById('chatDate').addEventListener('input', updateDate);
+  document.getElementById('chatDate').addEventListener('change', function() {
+    const customRow = document.getElementById('customDateRow');
+    if (document.getElementById('chatDate').value === 'custom') {
+      customRow.style.display = 'flex';
+    } else {
+      customRow.style.display = 'none';
+    }
+    updateDate();
+  });
+  document.getElementById('customDateInput').addEventListener('input', updateDate);
 
   document.getElementById('avatarInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
@@ -1134,7 +1157,10 @@ function updateBattery() {
 }
 
 function updateDate() {
-  const val = document.getElementById('chatDate').value;
+  let val = document.getElementById('chatDate').value;
+  if (val === 'custom') {
+    val = document.getElementById('customDateInput').value.trim() || '今天';
+  }
   const dateText = (val === '今天' && currentLang === 'ar') ? i18n.ar.today :
                    (val === '昨天' && currentLang === 'ar') ? i18n.ar.yesterday :
                    (val === 'اليوم' && currentLang === 'zh') ? i18n.zh.today :
@@ -1518,11 +1544,12 @@ function exportScreenshot() {
 
 // ====== 示例数据 ======
 function loadDemo() {
+  document.getElementById('customDateRow').style.display = 'none';
   if (currentLang === 'ar') {
     document.getElementById('chatName').value = 'د. أحمد';
     document.getElementById('chatStatus').value = 'online';
     document.getElementById('phoneTime').value = '14:30';
-    document.getElementById('chatDate').value = 'اليوم';
+    document.getElementById('chatDate').value = '今天';
     document.getElementById('msgTime').value = '14:32';
 
     messages = [
