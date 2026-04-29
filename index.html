@@ -1156,16 +1156,29 @@ function updateBattery() {
   }
 }
 
+function translateDateToAr(dateStr) {
+  const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  if (!match) return dateStr;
+  const year = match[1];
+  const month = parseInt(match[2], 10);
+  const day = match[3];
+  const arMonths = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  return day + ' ' + arMonths[month] + ' ' + year;
+}
+
 function updateDate() {
   let val = document.getElementById('chatDate').value;
   if (val === 'custom') {
     val = document.getElementById('customDateInput').value.trim() || '今天';
   }
-  const dateText = (val === '今天' && currentLang === 'ar') ? i18n.ar.today :
-                   (val === '昨天' && currentLang === 'ar') ? i18n.ar.yesterday :
-                   (val === 'اليوم' && currentLang === 'zh') ? i18n.zh.today :
-                   (val === 'الأمس' && currentLang === 'zh') ? i18n.zh.yesterday :
-                   val || i18n[currentLang].today;
+  let dateText = (val === '今天' && currentLang === 'ar') ? i18n.ar.today :
+                 (val === '昨天' && currentLang === 'ar') ? i18n.ar.yesterday :
+                 (val === 'اليوم' && currentLang === 'zh') ? i18n.zh.today :
+                 (val === 'الأمس' && currentLang === 'zh') ? i18n.zh.yesterday :
+                 val || i18n[currentLang].today;
+  if (currentLang === 'ar' && /\d{4}年\d{1,2}月\d{1,2}日/.test(dateText)) {
+    dateText = translateDateToAr(dateText);
+  }
   document.getElementById('dateLabel').textContent = dateText;
 }
 
