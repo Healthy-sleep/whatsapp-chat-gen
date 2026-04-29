@@ -962,7 +962,6 @@
           <div class="status-time" id="statusTime">14:30</div>
           <div class="status-right">
             <svg class="battery-icon" viewBox="0 0 27 12" width="27" height="12"><rect x="0.5" y="0.5" width="23" height="11" rx="2.5" fill="none" stroke="#000" stroke-width="1"/><rect id="batteryFill" x="2" y="2" width="19" height="8" rx="1.5" fill="#000"/><path d="M25 4v4a1 1 0 0 0 .5-.87V4.87A1 1 0 0 0 25 4z" fill="#000"/></svg>
-            <span class="battery-pct" id="batteryPct">100%</span>
           </div>
         </div>
 
@@ -987,10 +986,11 @@
 
         <!-- 输入栏 -->
         <div class="input-bar">
-          <button class="icon-btn" id="plusBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-          </button>
+          <button class="icon-btn" id="plusBtn">+</button>
           <input class="input-field" id="inputPlaceholder" placeholder="رسالة" readonly>
+          <button class="icon-btn" id="stickerBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.5L15.5 2z"></path><polyline points="15 2 15 7 20 7"></polyline></svg>
+          </button>
           <button class="icon-btn" id="cameraBtn">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
           </button>
@@ -1116,12 +1116,10 @@ function updateStatusBar() {
 function updateBattery() {
   const batteryInput = document.getElementById('batteryInput');
   const batteryValue = document.getElementById('batteryValue');
-  const batteryPct = document.getElementById('batteryPct');
   const batteryFill = document.getElementById('batteryFill');
 
   const pct = parseInt(batteryInput.value, 10);
   if (batteryValue) batteryValue.textContent = pct;
-  if (batteryPct) batteryPct.textContent = pct + '%';
 
   // Update battery fill width (max 19px at 100%)
   if (batteryFill) {
