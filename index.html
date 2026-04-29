@@ -1157,7 +1157,7 @@ function updateBattery() {
 }
 
 function translateDateToAr(dateStr) {
-  const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})(日?)/);
   if (!match) return dateStr;
   const year = match[1];
   const month = parseInt(match[2], 10);
@@ -1176,7 +1176,7 @@ function updateDate() {
                  (val === 'اليوم' && currentLang === 'zh') ? i18n.zh.today :
                  (val === 'الأمس' && currentLang === 'zh') ? i18n.zh.yesterday :
                  val || i18n[currentLang].today;
-  if (currentLang === 'ar' && /\d{4}年\d{1,2}月\d{1,2}日/.test(dateText)) {
+  if (currentLang === 'ar' && /\d{4}年\d{1,2}月\d{1,2}/.test(dateText)) {
     dateText = translateDateToAr(dateText);
   }
   document.getElementById('dateLabel').textContent = dateText;
